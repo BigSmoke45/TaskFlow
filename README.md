@@ -2,15 +2,6 @@
 
 A C# task manager with a graphical interface (WPF). Data is stored locally in SQLite via Entity Framework Core.
 
-Features
-
-Add, edit, and delete tasks via a dialog window
-Filter tasks: All / Active / Completed
-Priority levels: Low / Medium / High with color indicators
-Task statistics with completion percentage
-Confirmation dialog before deleting
-Dark theme (Catppuccin-inspired color palette)
-
 ---
 
 ## Versions
@@ -24,6 +15,7 @@ A graphical interface with a dark theme (Catppuccin-inspired color palette).
 - Priority levels: Low / Medium / High with color indicators
 - Task statistics with completion percentage
 - Confirmation dialog before deleting
+- Dark theme (Catppuccin-inspired color palette)
 
 **Screenshots:**
 <img width="1290" height="783" alt="image" src="https://github.com/user-attachments/assets/4a877037-7d56-4182-afa1-30c021fcaf53" />
