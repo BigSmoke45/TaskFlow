@@ -5,6 +5,9 @@
         Background="#1E1E2E">
 
     <Window.Resources>
+        <!-- Конвертер bool -> Visibility для панелі дій -->
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+
         <!-- Стиль кнопок -->
         <Style x:Key="MenuButton" TargetType="Button">
             <Setter Property="Background" Value="#313244"/>
@@ -75,19 +78,19 @@
                            FontFamily="Segoe UI"
                            Margin="0,10,0,30"/>
 
-                <!-- Кнопки навігації -->
+                <!-- Кнопки навігації — тепер через Command -->
                 <Button Content="📋  Всі задачі"
                         Style="{StaticResource MenuButton}"
-                        Click="ShowAll_Click"/>
+                        Command="{Binding ShowAllCommand}"/>
                 <Button Content="🔥  Активні"
                         Style="{StaticResource MenuButton}"
-                        Click="ShowActive_Click"/>
+                        Command="{Binding ShowActiveCommand}"/>
                 <Button Content="✅  Виконані"
                         Style="{StaticResource MenuButton}"
-                        Click="ShowCompleted_Click"/>
+                        Command="{Binding ShowCompletedCommand}"/>
                 <Button Content="📊  Статистика"
                         Style="{StaticResource MenuButton}"
-                        Click="ShowStats_Click"/>
+                        Command="{Binding ShowStatsCommand}"/>
 
                 <Separator Background="#45475A" Margin="0,16,0,16"/>
 
@@ -96,7 +99,7 @@
                         Background="#CBA6F7"
                         Foreground="#1E1E2E"
                         FontWeight="Bold"
-                        Click="AddTask_Click"/>
+                        Command="{Binding AddTaskCommand}"/>
             </StackPanel>
         </Border>
 
@@ -107,61 +110,59 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Заголовок -->
-            <TextBlock x:Name="PageTitle"
-                       Grid.Row="0"
-                       Text="Всі задачі"
+            <!-- Заголовок — тепер через Binding -->
+            <TextBlock Grid.Row="0"
+                       Text="{Binding PageTitle}"
                        Foreground="#CDD6F4"
                        FontSize="24"
                        FontWeight="Bold"
                        FontFamily="Segoe UI"
                        Margin="0,0,0,16"/>
 
-            <!-- Список задач -->
-            <ListView x:Name="TaskListView"
-                      Grid.Row="1"
+            <!-- Список задач — ItemsSource і SelectedItem через Binding -->
+            <ListView Grid.Row="1"
+                      ItemsSource="{Binding Tasks}"
+                      SelectedItem="{Binding SelectedTask, Mode=TwoWay}"
                       Background="Transparent"
                       BorderThickness="0"
                       Foreground="#CDD6F4"
                       FontFamily="Segoe UI"
-                      FontSize="14"
-                      SelectionChanged="TaskListView_SelectionChanged">
+                      FontSize="14">
 
-                      <ListView.ItemContainerStyle>
-                        <Style TargetType="ListViewItem">
-                            <Setter Property="Foreground" Value="#CDD6F4"/>
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="BorderThickness" Value="0"/>
-                            <Setter Property="Padding" Value="4"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="ListViewItem">
-                                        <Border x:Name="ItemBorder"
-                                                Background="Transparent"
-                                                BorderThickness="0"
-                                                Padding="4">
-                                            <GridViewRowPresenter
-                                                Columns="{TemplateBinding GridView.ColumnCollection}"
-                                                Content="{TemplateBinding Content}"/>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="ItemBorder"
-                                                        Property="Background"
-                                                        Value="#313244"/>
-                                            </Trigger>
-                                            <Trigger Property="IsSelected" Value="True">
-                                                <Setter TargetName="ItemBorder"
-                                                        Property="Background"
-                                                        Value="#45475A"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </ListView.ItemContainerStyle>
-
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="Foreground" Value="#CDD6F4"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Padding" Value="4"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListViewItem">
+                                    <Border x:Name="ItemBorder"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Padding="4">
+                                        <GridViewRowPresenter
+                                            Columns="{TemplateBinding GridView.ColumnCollection}"
+                                            Content="{TemplateBinding Content}"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="ItemBorder"
+                                                    Property="Background"
+                                                    Value="#313244"/>
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="ItemBorder"
+                                                    Property="Background"
+                                                    Value="#45475A"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListView.ItemContainerStyle>
 
                 <ListView.View>
                     <GridView>
@@ -181,13 +182,12 @@
                 </ListView.View>
             </ListView>
 
-            <!-- Панель дій (з'являється при виборі задачі) -->
-            <StackPanel x:Name="ActionPanel"
-                        Grid.Row="1"
+            <!-- Панель дій — Visibility через BooleanToVisibilityConverter -->
+            <StackPanel Grid.Row="1"
                         VerticalAlignment="Bottom"
                         HorizontalAlignment="Right"
                         Orientation="Horizontal"
-                        Visibility="Collapsed"
+                        Visibility="{Binding IsTaskSelected, Converter={StaticResource BoolToVis}}"
                         Margin="0,0,0,10">
                 <Button Content="✅ Виконано"
                         Style="{StaticResource MenuButton}"
@@ -195,20 +195,20 @@
                         Foreground="#1E1E2E"
                         Width="120"
                         Margin="0,0,8,0"
-                        Click="Complete_Click"/>
+                        Command="{Binding CompleteTaskCommand}"/>
                 <Button Content="✏️ Редагувати"
                         Style="{StaticResource MenuButton}"
                         Background="#89B4FA"
                         Foreground="#1E1E2E"
                         Width="130"
                         Margin="0,0,8,0"
-                        Click="Edit_Click"/>
+                        Command="{Binding EditTaskCommand}"/>
                 <Button Content="🗑️ Видалити"
                         Style="{StaticResource MenuButton}"
                         Background="#F38BA8"
                         Foreground="#1E1E2E"
                         Width="120"
-                        Click="Delete_Click"/>
+                        Command="{Binding DeleteTaskCommand}"/>
             </StackPanel>
         </Grid>
     </Grid>
