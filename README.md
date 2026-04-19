@@ -2,6 +2,15 @@
 
 A C# task manager with a graphical interface (WPF). Data is stored locally in SQLite via Entity Framework Core.
 
+Features
+
+Add, edit, and delete tasks via a dialog window
+Filter tasks: All / Active / Completed
+Priority levels: Low / Medium / High with color indicators
+Task statistics with completion percentage
+Confirmation dialog before deleting
+Dark theme (Catppuccin-inspired color palette)
+
 ---
 
 ## Versions
@@ -36,35 +45,47 @@ A graphical interface with a dark theme (Catppuccin-inspired color palette).
 | ORM | Entity Framework Core 10 |
 | Database | SQLite |
 | Patterns | Repository pattern, separation of concerns |
+| Testing | xUnit, EF Core InMemory |
 
 ---
 
 ## Project Structure
 
 ```
-
-WpfTaskFlow/                ← WPF version
-├── Models/
-│   └── TaskItem.cs
-├── Data/
-│   └── AppDbContext.cs
-├── Repository/
-│   └── TaskRepository.cs
-├── MainWindow.xaml          # Main application window
-├── MainWindow.xaml.cs
-├── TaskDialog.xaml          # Add / Edit task dialog
-└── TaskDialog.xaml.cs
+TaskFlow/
+├── WpfTaskFlow/                  ← Main application
+│   ├── Models/
+│   │   └── TaskItem.cs           # Entity model
+│   ├── Data/
+│   │   └── AppDbContext.cs       # EF Core DB context
+│   ├── Repository/
+│   │   └── TaskRepository.cs     # All database logic
+│   ├── ViewModels/
+│   │   ├── MainViewModel.cs      # Main MVVM ViewModel
+│   │   ├── TaskViewModel.cs      # Display model for ListView
+│   │   └── RelayCommand.cs       # ICommand implementation
+│   ├── MainWindow.xaml           # Main application window
+│   ├── TaskDialog.xaml           # Add / Edit task dialog
+│   └── App.xaml
+└── TaskFlow.Tests/               ← Unit tests
+    └── TaskRepositoryTests.cs    # 19 tests for TaskRepository
 ```
 
 ---
 
 ## Key Implementation Details
 
-**Repository pattern** — all database logic lives in `TaskRepository`. The UI layer never touches the database directly.
+MVVM pattern — MainViewModel implements INotifyPropertyChanged and exposes ICommand bindings. MainWindow.xaml.cs contains no business logic — only DataContext = new MainViewModel().
 
-**Entity Framework Core + SQLite** — the database file (`taskflow.db`) is created automatically on first run via `context.Database.Migrate()`. No manual SQL required.
+RelayCommand — a generic ICommand implementation that accepts Action and Func<bool> lambdas, keeping ViewModel code clean without third-party libraries.
 
-**WPF dialog window** — `TaskDialog` is reused for both creating new tasks and editing existing ones. When editing, it pre-fills the fields with the current task data.
+Repository pattern — all database logic lives in TaskRepository. The UI layer never touches the database directly.
+
+Entity Framework Core + SQLite — the database file (taskflow.db) is created automatically on first run via EnsureCreated(). No manual SQL required.
+
+Unit tests — TaskRepository is covered by 19 xUnit tests using an EF Core InMemory database. Each test gets a clean isolated database instance via Guid.NewGuid() as the database name.
+
+WPF dialog window — TaskDialog is reused for both creating new tasks and editing existing ones. When editing, it pre-fills the fields with the current task data.
 
 ---
 
@@ -82,4 +103,4 @@ dotnet run --project WpfTaskFlow/WpfTaskFlow
 
 ## Notes
 
-A pet project developed as a demonstration of C# desktop development with Entity Framework Core and WPF.
+A pet project built to demonstrate C# desktop development with WPF, MVVM, Entity Framework Core, and unit testing.
